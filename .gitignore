@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Trained models (excluded intentionally)
+*.keras
+*.h5
+*.pt
+*.pth
+
+# Logs
+*.log
+
+
+# Test Images
+*.jpg
+*.png
+
+# Frontend
+*.html
+*.css
+*.js
