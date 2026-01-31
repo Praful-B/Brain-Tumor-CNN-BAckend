@@ -1,52 +1,57 @@
-from flask import Flask, request, render_template, send_from_directory
 import os
-import sys
-from model.gradcam import run_gradcam
+from flask import Flask, render_template, request, send_from_directory
+from werkzeug.utils import secure_filename
 
+from app.model.gradcam import run_gradcam
 
+# -------------------------------------------------
+# App setup
+# -------------------------------------------------
+app = Flask(__name__)
 
-# Add the backend directory to the path for imports
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-sys.path.insert(0, PROJECT_ROOT)
+PROJECT_ROOT = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..")
+)
 
+UPLOAD_DIR = os.path.join(PROJECT_ROOT, "storage", "uploads")
+OUTPUT_DIR = os.path.join(PROJECT_ROOT, "storage", "outputs")
 
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-app = Flask(__name__, 
-            template_folder=os.path.join(os.path.dirname(__file__), 'templates'),
-            static_folder=os.path.join(os.path.dirname(__file__), 'static'))
-
-UPLOAD_FOLDER = os.path.join(PROJECT_ROOT, 'uploads')
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-@app.route('/', methods=['GET', 'POST'])
+# -------------------------------------------------
+# Routes
+# -------------------------------------------------
+@app.route("/", methods=["GET"])
 def index():
-    if request.method == 'POST':
-        file = request.files.get('file')
-        if file and file.filename:
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-            file.save(filepath)
-            
-            try:
-                # Run Grad-CAM and get results
-                gradcam_path, label, confidence = run_gradcam(filepath)
-                
-                # Clean up uploaded file
-                os.remove(filepath)
-                
-                return render_template('result.html', 
-                                     label=label, 
-                                     confidence=round(confidence, 2),
-                                     gradcam_filename=os.path.basename(gradcam_path))
-            except Exception as e:
-                return f"Error processing image: {str(e)}"
-    
-    return render_template('index.html')
+    return render_template("index.html")
 
-@app.route('/outputs/<filename>')
-def output_file(filename):
-    output_dir = os.path.join(PROJECT_ROOT, 'storage', 'outputs')
-    return send_from_directory(output_dir, filename)
+@app.route("/predict", methods=["POST"])
+def predict():
+    if "file" not in request.files:
+        return "No file uploaded", 400
 
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    file = request.files["file"]
+    if file.filename == "":
+        return "Empty filename", 400
+
+    filename = secure_filename(file.filename)
+    upload_path = os.path.join(UPLOAD_DIR, filename)
+    file.save(upload_path)
+
+    gradcam_file, label, confidence = run_gradcam(upload_path)
+
+    return render_template(
+        "result.html",
+        label=label,
+        confidence=round(confidence, 2),
+        gradcam_filename=gradcam_file
+    )
+
+@app.route("/outputs/<filename>")
+def outputs(filename):
+    return send_from_directory(OUTPUT_DIR, filename)
+
+# -------------------------------------------------
+if __name__ == "__main__":
+    app.run(debug=True)
