@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Result</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { color: #333; }
+        .result { background-color: #f9f9f9; padding: 20px; border-radius: 5px; margin-top: 20px; }
+        img { max-width: 100%; height: auto; margin-top: 20px; border: 1px solid #ddd; }
+        a { display: inline-block; margin-top: 20px; padding: 10px 20px; background-color: #2196F3; color: white; text-decoration: none; border-radius: 5px; }
+        a:hover { background-color: #0b7dda; }
+    </style>
+</head>
+<body>
+    <h1>Analysis Result</h1>
+    <div class="result">
+        <h2>Prediction: {{ label }}</h2>
+        <p>Confidence: {{ confidence }}%</p>
+        <p>The Grad-CAM heatmap highlights the regions the model focused on for this prediction.</p>
+        <img src="{{ url_for('output_file', filename=gradcam_filename) }}" alt="Grad-CAM Heatmap">
+    </div>
+    <a href="/">Analyze Another Image</a>
+</body>
+</html>

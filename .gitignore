@@ -24,8 +24,3 @@ Thumbs.db
 # Test Images
 *.jpg
 *.png
-
-# Frontend
-*.html
-*.css
-*.js
