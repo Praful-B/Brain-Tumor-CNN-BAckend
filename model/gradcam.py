@@ -10,11 +10,17 @@ from tensorflow.keras.models import load_model
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, PROJECT_ROOT)
 
-from backend.app.utils.brain_mask import get_brain_mask
+# Change the import to use the correct path
+try:
+    from app.utils.brain_mask import get_brain_mask
+except ImportError:
+    # Fallback if running standalone
+    from utils.brain_mask import get_brain_mask
 
 # ------------------ CONFIG ------------------
 IMG_SIZE = 224
-MODEL_PATH = os.path.join(PROJECT_ROOT, "model", "trained_multi_class_model.keras")
+# Update model path to point to the root directory
+MODEL_PATH = os.path.join(PROJECT_ROOT, "..", "trained_multi_class_model.keras")
 
 OUTPUT_DIR = os.path.join(PROJECT_ROOT, "storage", "outputs")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
