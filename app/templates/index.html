@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Brain Tumor Classification</title>
+
+    <style>
+        body {
+            background: radial-gradient(circle at top, #0f172a, #020617);
+            color: #e5e7eb;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card {
+            background: #020617;
+            padding: 40px;
+            border-radius: 14px;
+            width: 420px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+        }
+
+        button {
+            padding: 10px 24px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 14px;
+            font-size: 16px;
+        }
+
+        img {
+            margin-top: 20px;
+            max-width: 100%;
+            border-radius: 8px;
+            border: 2px solid #2563eb;
+        }
+
+        .confidence {
+            color: #93c5fd;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="card">
+    <h1>🧠 Brain Tumor Classification</h1>
+
+    <form id="uploadForm">
+        <input type="file" id="fileInput" required>
+        <br>
+        <button type="submit">Analyze</button>
+    </form>
+
+    <div id="result"></div>
+</div>
+
+<script>
+document.getElementById("uploadForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const fileInput = document.getElementById("fileInput");
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+
+    const response = await fetch("/analyze", {
+        method: "POST",
+        body: formData
+    });
+
+    const data = await response.json();
+
+    let html = `
+        <h2>Prediction: ${data.prediction}</h2>
+        <p class="confidence">Confidence: ${(data.confidence * 100).toFixed(2)}%</p>
+    `;
+
+    if (data.gradcam) {
+        html += `<img src="${data.gradcam}" alt="Grad-CAM Heatmap">`;
+    }
+
+    document.getElementById("result").innerHTML = html;
+});
+</script>
+
+</body>
+</html>
